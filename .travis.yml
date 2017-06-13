@@ -1,0 +1,49 @@
+sudo: required
+
+notifications:
+  email: false
+
+services:
+  - docker
+
+env:
+  matrix :
+    - env:
+      NODE_PATCH_VERSION: '8.1.0'
+      NODE_MINOR_VERSION: '8.1'
+      NODE_MAJOR_VERSION: '8'
+      LATEST: 'latest'
+    - env:
+      NODE_PATCH_VERSION: '6.11.0'
+      NODE_MINOR_VERSION: '6.11'
+      NODE_MAJOR_VERSION: '6'
+    - env:
+      NODE_PATCH_VERSION: '4.8.3'
+      NODE_MINOR_VERSION: '4.8'
+      NODE_MAJOR_VERSION: '4'
+
+install:
+  - docker build -t "lgatica/node-krb5-gm:$NODE_PATCH_VERSION" "$NODE_PATCH_VERSION"
+  - docker build -t "lgatica/node-krb5-gm:$NODE_PATCH_VERSION-onbuild" "$NODE_PATCH_VERSION/onbuild"
+
+script:
+  - docker run --rm "lgatica/node-krb5-gm:$NODE_PATCH_VERSION" node --version
+
+after_success:
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker tag "lgatica/node-krb5-gm:$NODE_PATCH_VERSION" "lgatica/node-krb5-gm:$NODE_MINOR_VERSION"
+  - docker tag "lgatica/node-krb5-gm:$NODE_PATCH_VERSION" "lgatica/node-krb5-gm:$NODE_MAJOR_VERSION"
+  - docker tag "lgatica/node-krb5-gm:$NODE_PATCH_VERSION-onbuild" "lgatica/node-krb5-gm:$NODE_MINOR_VERSION-onbuild"
+  - docker tag "lgatica/node-krb5-gm:$NODE_PATCH_VERSION-onbuild" "lgatica/node-krb5-gm:$NODE_MAJOR_VERSION-onbuild"
+  - docker push "lgatica/node-krb5-gm:$NODE_PATCH_VERSION"
+  - docker push "lgatica/node-krb5-gm:$NODE_MINOR_VERSION"
+  - docker push "lgatica/node-krb5-gm:$NODE_MAJOR_VERSION"
+  - docker push "lgatica/node-krb5-gm:$NODE_PATCH_VERSION-onbuild"
+  - docker push "lgatica/node-krb5-gm:$NODE_MINOR_VERSION-onbuild"
+  - docker push "lgatica/node-krb5-gm:$NODE_MAJOR_VERSION-onbuild"
+  - if [ "$LATEST" == "latest" ]; then
+    docker tag "lgatica/node-krb5-gm:$NODE_PATCH_VERSION" "lgatica/node-krb5-gm:latest";
+    docker tag "lgatica/node-krb5-gm:$NODE_PATCH_VERSION-onbuild" "lgatica/node-krb5-gm:onbuild";
+    docker push "lgatica/node-krb5-gm:latest";
+    docker push "lgatica/node-krb5-gm:onbuild";
+    fi
