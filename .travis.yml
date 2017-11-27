@@ -14,7 +14,7 @@ env:
     - env:
       VERSION: '6.11.0'
     - env:
-      VERSION: '4.8.3'
+      VERSION: '4.8.6'
 
 install:
   - docker build -t "lgatica/node-krb5-gm:$VERSION" "$VERSION"
